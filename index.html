@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JavaScript APIs</title>
+  </head>
+  <body>
+    <main
+      style="
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+      "
+    >
+      <div>
+        <h1>JavaScript APIs</h1>
+        <p>
+          Open the Browser Console to view your work (Right-Click => Inspect or
+          fn+F12)
+        </p>
+        <div id="inputContainer">
+          <label for="searchWord">Giphy Search:</label>
+          <input style="margin: 2rem" type="text" id="searchWord" />
+          <button id="submitSearch">Giphy by Search</button>
+        </div>
+
+        <div id="imageContainer" style="max-width: 680px">
+          <img
+            src="#"
+            alt="Giphy Selection"
+            style="width: 100%; height: auto"
+          />
+        </div>
+      </div>
+    </main>
+
+    <script>
+      const searchButton = document.querySelector("#submitSearch");
+      const searchInput = document.querySelector("#searchWord");
+      const imageElement = document.querySelector("#imageContainer img");
+      const feedbackParagraph = document.createElement("p");
+      document.getElementById("inputContainer").appendChild(feedbackParagraph);
+      feedbackParagraph.style.color = "red";
+
+      searchButton.addEventListener("click", () => {
+        const searchTerm = searchInput.value.trim();
+
+        if (!searchTerm) {
+          feedbackParagraph.textContent = "Please enter a search term";
+          return;
+        }
+
+        const apiKey = "n8Z0xxdfkctWehjyx85wkexkbVKPSzIw";
+        const url = `https://api.giphy.com/v1/gifs/translate?api_key=${apiKey}&s=${encodeURIComponent(
+          searchTerm
+        )}`;
+
+        console.log(`Fetching GIF for search term: "${searchTerm}"`);
+
+        fetch(url)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then((res) => {
+            console.log("SUCCESS: GIF data received", res);
+
+            if (res.data && res.data.images && res.data.images.original) {
+              imageElement.src = res.data.images.original.url;
+              imageElement.alt = `GIF related to: ${searchTerm}`;
+              searchInput.value = "";
+              feedbackParagraph.textContent = "";
+            } else {
+              throw new Error("No GIF found for that search term");
+            }
+          })
+          .catch((error) => {
+            console.error("ERROR: Failed to fetch GIF:", error);
+            feedbackParagraph.textContent =
+              error.message || "Failed to fetch GIF. Please try again.";
+            imageElement.src = "#";
+            imageElement.alt = "Giphy Selection";
+          });
+      });
+
+      searchInput.addEventListener("keypress", (event) => {
+        if (event.key === "Enter") {
+          searchButton.click();
+        }
+      });
+    </script>
+  </body>
+</html>
